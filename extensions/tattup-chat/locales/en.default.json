@@ -1,0 +1,18 @@
+{
+  "heading": "Create Your Next Ink",
+  "subheading": "Select a style, describe your vision, and let our AI models draft your masterpiece.",
+  "login_heading": "Sign in to Create Tattoos",
+  "login_text": "Create an account or sign in to start generating AI tattoo designs.",
+  "login_button": "Sign In",
+  "generate": "Generate",
+  "generating": "Generating...",
+  "credits": "Credits",
+  "buy_credits": "Buy Credits",
+  "no_credits": "You're out of credits! Purchase more to continue creating.",
+  "gallery_empty": "Your generated designs will appear here.",
+  "model_standard": "Standard (1 Credit)",
+  "model_pro": "Pro HD (2 Credits)",
+  "add_to_cart": "Add to Cart",
+  "one_time": "One-Time",
+  "subscription": "Monthly Subscription"
+}

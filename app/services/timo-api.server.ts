@@ -1,56 +1,58 @@
 /**
- * Client for Timo's AI tattoo generation backend.
- * Base URL and auth token come from environment variables.
+ * Client for the AI tattoo generation backend (Timo's API).
+ *
+ * Endpoints (from Bruno collection):
+ *   POST /api/generate     → { jobId }
+ *   GET  /api/status/:jobId → { status, result_url? }
+ *   GET  <imageUrl>         → binary image
  */
 
-export interface TimoGenerateResponse {
+export interface GenerateResponse {
   jobId: string;
 }
 
-export interface TimoStatusResponse {
+export interface StatusResponse {
   status: "pending" | "processing" | "completed" | "failed";
   result_url?: string;
 }
 
 /**
- * Start a new tattoo generation job.
- * POST /generate → { jobId }
+ * Start a new tattoo generation.
+ * POST /api/generate { prompt, shopDomain }
  */
 export async function startGeneration(
   baseUrl: string,
   authToken: string,
   prompt: string,
-  shopId: string,
-): Promise<TimoGenerateResponse> {
-  const response = await fetch(`${baseUrl}/generate`, {
+  shopDomain: string,
+): Promise<GenerateResponse> {
+  const response = await fetch(`${baseUrl}/api/generate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${authToken}`,
     },
-    body: JSON.stringify({ prompt, shopId }),
+    body: JSON.stringify({ prompt, shopDomain }),
   });
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(
-      `Timo API generate failed (${response.status}): ${text}`,
-    );
+    throw new Error(`AI generate failed (${response.status}): ${text}`);
   }
 
-  return response.json() as Promise<TimoGenerateResponse>;
+  return response.json() as Promise<GenerateResponse>;
 }
 
 /**
- * Check the status of a generation job.
- * GET /status/:jobId → { status, result_url? }
+ * Poll the status of a generation job.
+ * GET /api/status/:jobId → { status, result_url? }
  */
 export async function checkGenerationStatus(
   baseUrl: string,
   authToken: string,
   jobId: string,
-): Promise<TimoStatusResponse> {
-  const response = await fetch(`${baseUrl}/status/${jobId}`, {
+): Promise<StatusResponse> {
+  const response = await fetch(`${baseUrl}/api/status/${jobId}`, {
     headers: {
       Authorization: `Bearer ${authToken}`,
     },
@@ -58,10 +60,8 @@ export async function checkGenerationStatus(
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(
-      `Timo API status failed (${response.status}): ${text}`,
-    );
+    throw new Error(`AI status failed (${response.status}): ${text}`);
   }
 
-  return response.json() as Promise<TimoStatusResponse>;
+  return response.json() as Promise<StatusResponse>;
 }

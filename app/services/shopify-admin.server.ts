@@ -133,6 +133,21 @@ export async function setCustomerCredits(
   }
 }
 
+/**
+ * Add credits to a customer (atomic: read current + add).
+ */
+export async function addCustomerCredits(
+  shop: string,
+  accessToken: string,
+  customerId: string,
+  amount: number,
+): Promise<number> {
+  const current = await getCustomerCredits(shop, accessToken, customerId);
+  const newTotal = current + amount;
+  await setCustomerCredits(shop, accessToken, customerId, newTotal);
+  return newTotal;
+}
+
 // ---------------------------------------------------------------------------
 // Shopify Files upload
 // ---------------------------------------------------------------------------
@@ -185,7 +200,7 @@ export async function uploadImageToShopifyFiles(
 
   const target: StagedTarget = targets[0];
 
-  // Step 2: Download image from Timo's API
+  // Step 2: Download image from AI backend
   const imageResponse = await fetch(sourceImageUrl);
   if (!imageResponse.ok) {
     throw new Error(`Failed to download image: ${imageResponse.status}`);
@@ -245,14 +260,9 @@ export async function uploadImageToShopifyFiles(
   }
 
   const file = files[0];
-  // The preview image URL may not be ready immediately.
-  // The fileId is always available and can be used as a reference.
   const fileUrl = file.preview?.image?.url || target.resourceUrl;
 
-  return {
-    fileId: file.id,
-    fileUrl,
-  };
+  return { fileId: file.id, fileUrl };
 }
 
 // ---------------------------------------------------------------------------
@@ -268,7 +278,7 @@ export async function createTattooMetaobject(
     prompt: string;
     shopifyFileId: string;
     customerId: string;
-    generationId: string;
+    jobId: string;
   },
 ): Promise<string> {
   const result = await shopifyGraphQL(shop, accessToken, `
@@ -281,7 +291,7 @@ export async function createTattooMetaobject(
   `, {
     metaobject: {
       type: METAOBJECT_TYPE,
-      handle: data.generationId,
+      handle: `tattup-${data.jobId}`,
       fields: [
         { key: "prompt", value: data.prompt },
         { key: "image", value: data.shopifyFileId },
@@ -293,9 +303,7 @@ export async function createTattooMetaobject(
 
   const errors = result?.metaobjectCreate?.userErrors;
   if (errors?.length) {
-    throw new Error(
-      `Metaobject create failed: ${JSON.stringify(errors)}`,
-    );
+    throw new Error(`Metaobject create failed: ${JSON.stringify(errors)}`);
   }
 
   return result?.metaobjectCreate?.metaobject?.id;
@@ -313,7 +321,6 @@ export async function getCustomerTattoos(
     createdAt: string;
   }>
 > {
-  // Query metaobjects of type tattup_generation filtered by customer_id
   const data = await shopifyGraphQL(shop, accessToken, `
     query getTattoos($query: String!) {
       metaobjects(type: "${METAOBJECT_TYPE}", first: 50, query: $query) {

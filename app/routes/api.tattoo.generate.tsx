@@ -2,25 +2,32 @@
  * POST /api/tattoo/generate
  *
  * Starts a tattoo generation job.
- * Body: { prompt: string, customerId: string, shop: string }
- * Returns: { jobId: string, generationId: string }
+ * Body: { prompt: string, model: "standard" | "pro", style?: string }
+ * App Proxy adds: ?shop=...&logged_in_customer_id=...
  *
  * Flow:
- * 1. Check customer credits via Shopify metafield
- * 2. Deduct one credit
- * 3. Call Timo's API to start generation
- * 4. Store job in D1
- * 5. Return job ID for polling
+ * 1. Validate customer is logged in (from App Proxy)
+ * 2. Check credits (standard = 1, pro = 2)
+ * 3. Deduct credits
+ * 4. Call AI backend to start generation
+ * 5. Store job in D1 for status tracking
+ * 6. Return jobId for polling
  */
 
 import type { ActionFunctionArgs } from "react-router";
 import { getDb, executeQuery } from "../db.server";
 import { startGeneration } from "../services/timo-api.server";
+import { getAppProxyContext } from "../services/app-proxy.server";
 import {
   getOfflineSession,
   getCustomerCredits,
   setCustomerCredits,
 } from "../services/shopify-admin.server";
+
+const CREDIT_COSTS: Record<string, number> = {
+  standard: 1,
+  pro: 2,
+};
 
 export async function action({ request, context }: ActionFunctionArgs) {
   if (request.method !== "POST") {
@@ -29,67 +36,73 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   try {
     const body = await request.json();
-    const { prompt, customerId, shop } = body as {
+    const { prompt, model = "standard", style } = body as {
       prompt?: string;
-      customerId?: string;
-      shop?: string;
+      model?: string;
+      style?: string;
     };
 
-    if (!prompt || !customerId || !shop) {
-      return Response.json(
-        { error: "Missing required fields: prompt, customerId, shop" },
-        { status: 400 },
-      );
+    if (!prompt) {
+      return Response.json({ error: "Missing prompt" }, { status: 400 });
     }
 
-    // Get Shopify offline session for this shop
-    const session = await getOfflineSession(shop);
+    // Get shop + customer from App Proxy params (or body fallback)
+    const proxyCtx = getAppProxyContext(request, body);
+    const session = await getOfflineSession(proxyCtx.shop);
+
+    // Calculate credit cost
+    const cost = CREDIT_COSTS[model] || 1;
 
     // Check credits
     const credits = await getCustomerCredits(
       session.shop,
       session.accessToken,
-      customerId,
+      proxyCtx.customerId,
     );
 
-    if (credits <= 0) {
+    if (credits < cost) {
       return Response.json(
-        { error: "No credits remaining", credits: 0 },
+        {
+          error: "Insufficient credits",
+          credits,
+          required: cost,
+        },
         { status: 402 },
       );
     }
 
-    // Deduct one credit
+    // Deduct credits
     await setCustomerCredits(
       session.shop,
       session.accessToken,
-      customerId,
-      credits - 1,
+      proxyCtx.customerId,
+      credits - cost,
     );
 
-    // Call Timo's API to start generation
+    // Build the full prompt (include style if provided)
+    const fullPrompt = style ? `${prompt} | Style: ${style}` : prompt;
+
+    // Call AI backend
     const env = context.cloudflare.env;
     const { jobId } = await startGeneration(
-      env.TIMO_API_BASE_URL,
-      env.TIMO_API_AUTH_TOKEN,
-      prompt,
-      shop,
+      env.API_BASE_URL,
+      env.API_AUTH_TOKEN,
+      fullPrompt,
+      proxyCtx.shop,
     );
 
-    // Store in D1
-    const generationId = `gen_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // Store job context in D1 for status lookups
     const db = getDb();
     await executeQuery(
       db,
-      `INSERT INTO generations (id, job_id, shop, customer_id, prompt, status)
+      `INSERT INTO generations (job_id, shop, customer_id, prompt, model, status)
        VALUES (?, ?, ?, ?, ?, 'pending')`,
-      [generationId, jobId, shop, customerId, prompt],
+      [jobId, proxyCtx.shop, proxyCtx.customerId, fullPrompt, model],
     );
 
     return Response.json({
       jobId,
-      generationId,
-      creditsRemaining: credits - 1,
+      creditsRemaining: credits - cost,
     });
   } catch (error) {
     console.error("Generate error:", error);

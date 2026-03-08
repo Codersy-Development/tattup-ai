@@ -7,9 +7,8 @@ interface Env {
   SHOPIFY_APP_URL: string;
   SCOPES: string;
   SHOP_CUSTOM_DOMAIN?: string;
-  VALUE_FROM_CLOUDFLARE?: string;
 
-  // Timo's AI backend API
-  TIMO_API_BASE_URL: string;
-  TIMO_API_AUTH_TOKEN: string;
+  // AI generation backend
+  API_BASE_URL: string;
+  API_AUTH_TOKEN: string;
 }

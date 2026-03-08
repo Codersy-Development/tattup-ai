@@ -1,35 +1,23 @@
 /**
- * GET /api/tattoo/gallery?customerId=gid://shopify/Customer/123&shop=tattup.myshopify.com
+ * GET /api/tattoo/gallery
  *
  * Returns the customer's tattoo generation history.
- * Fetches from both D1 (for pending/in-progress) and Shopify metaobjects (for completed).
+ * App Proxy adds: ?shop=...&logged_in_customer_id=...
  */
 
 import type { LoaderFunctionArgs } from "react-router";
-import { getDb, getAllRows } from "../db.server";
+import { getAppProxyContext } from "../services/app-proxy.server";
 import {
   getOfflineSession,
   getCustomerTattoos,
-  getCustomerCredits,
 } from "../services/shopify-admin.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-  const customerId = url.searchParams.get("customerId");
-  const shop = url.searchParams.get("shop");
-
-  if (!customerId || !shop) {
-    return Response.json(
-      { error: "Missing required query params: customerId, shop" },
-      { status: 400 },
-    );
-  }
-
   try {
-    const session = await getOfflineSession(shop);
+    const proxyCtx = getAppProxyContext(request);
+    const session = await getOfflineSession(proxyCtx.shop);
 
-    // Fetch completed tattoos from Shopify metaobjects
-    let shopifyTattoos: Array<{
+    let tattoos: Array<{
       id: string;
       prompt: string;
       imageUrl: string;
@@ -37,39 +25,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }> = [];
 
     try {
-      shopifyTattoos = await getCustomerTattoos(
+      tattoos = await getCustomerTattoos(
         session.shop,
         session.accessToken,
-        customerId,
+        proxyCtx.customerId,
       );
     } catch (err) {
-      // Metaobjects might not be set up yet - fall back to D1 only
-      console.error("Metaobject query failed (falling back to D1):", err);
+      console.error("Metaobject query failed:", err);
     }
 
-    // Fetch in-progress jobs from D1
-    const db = getDb();
-    const pendingResult = await getAllRows(
-      db,
-      `SELECT id, job_id, prompt, status, created_at
-       FROM generations
-       WHERE customer_id = ? AND shop = ? AND status != 'completed'
-       ORDER BY created_at DESC`,
-      [customerId, shop],
-    );
-
-    // Get current credits
-    const credits = await getCustomerCredits(
-      session.shop,
-      session.accessToken,
-      customerId,
-    );
-
-    return Response.json({
-      credits,
-      completed: shopifyTattoos,
-      pending: pendingResult.results || [],
-    });
+    return Response.json({ tattoos });
   } catch (error) {
     console.error("Gallery error:", error);
     return Response.json(

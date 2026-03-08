@@ -1,0 +1,7 @@
+api_version = "2026-04"
+
+[[extensions]]
+name = "TattUp AI Generator"
+handle = "tattup-chat"
+uid = "b7ae386b-094a-1e7d-d629-02ef00128ab45e27cab9"
+type = "theme"

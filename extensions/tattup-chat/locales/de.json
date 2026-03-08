@@ -1,0 +1,18 @@
+{
+  "heading": "Erstelle dein nächstes Tattoo",
+  "subheading": "Wähle einen Stil, beschreibe deine Vision und lass unsere KI dein Meisterwerk entwerfen.",
+  "login_heading": "Melde dich an, um Tattoos zu erstellen",
+  "login_text": "Erstelle ein Konto oder melde dich an, um KI-Tattoo-Designs zu generieren.",
+  "login_button": "Anmelden",
+  "generate": "Generieren",
+  "generating": "Wird generiert...",
+  "credits": "Credits",
+  "buy_credits": "Credits kaufen",
+  "no_credits": "Du hast keine Credits mehr! Kaufe mehr, um weiter zu erstellen.",
+  "gallery_empty": "Deine generierten Designs erscheinen hier.",
+  "model_standard": "Standard (1 Credit)",
+  "model_pro": "Pro HD (2 Credits)",
+  "add_to_cart": "In den Warenkorb",
+  "one_time": "Einmalkauf",
+  "subscription": "Monatsabo"
+}

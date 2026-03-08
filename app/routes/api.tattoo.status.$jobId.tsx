@@ -2,14 +2,8 @@
  * GET /api/tattoo/status/:jobId
  *
  * Polls the status of a tattoo generation job.
- * Returns: { status, imageUrl?, shopifyFileUrl?, creditsRemaining? }
- *
- * When Timo's API reports "completed":
- * 1. Downloads the image
- * 2. Uploads to Shopify Files
- * 3. Creates a tattup_generation metaobject
- * 4. Updates D1 with final URLs
- * 5. Returns the Shopify file URL
+ * When AI backend reports "completed":
+ *   → Downloads image → Uploads to Shopify Files → Creates metaobject → Returns URL
  */
 
 import type { LoaderFunctionArgs } from "react-router";
@@ -31,7 +25,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
   try {
     const db = getDb();
 
-    // Look up the job in D1
+    // Look up job context from D1
     const job = await getFirstRow(
       db,
       "SELECT * FROM generations WHERE job_id = ?",
@@ -42,98 +36,64 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
       return Response.json({ error: "Job not found" }, { status: 404 });
     }
 
-    // If already completed and saved to Shopify, return cached result
-    if (job.status === "completed" && job.shopify_file_url) {
+    // Already completed and saved? Return cached result.
+    if (job.status === "completed" && job.image_url) {
       return Response.json({
         status: "completed",
-        imageUrl: job.shopify_file_url,
-        shopifyFileId: job.shopify_file_id,
-        metaobjectId: job.metaobject_id,
+        imageUrl: job.image_url,
       });
     }
 
-    // Poll Timo's API
+    // Poll AI backend
     const env = context.cloudflare.env;
-    const timoStatus = await checkGenerationStatus(
-      env.TIMO_API_BASE_URL,
-      env.TIMO_API_AUTH_TOKEN,
+    const aiStatus = await checkGenerationStatus(
+      env.API_BASE_URL,
+      env.API_AUTH_TOKEN,
       jobId,
     );
 
-    // If not completed yet, return current status
-    if (timoStatus.status !== "completed" || !timoStatus.result_url) {
-      // Update status in D1 if changed
-      if (timoStatus.status !== job.status) {
-        await executeQuery(
-          db,
-          "UPDATE generations SET status = ?, updated_at = unixepoch() WHERE job_id = ?",
-          [timoStatus.status, jobId],
-        );
-      }
-
-      return Response.json({ status: timoStatus.status });
+    if (aiStatus.status !== "completed" || !aiStatus.result_url) {
+      return Response.json({ status: aiStatus.status });
     }
 
-    // === Image is ready - save to Shopify ===
+    // === Image ready → save to Shopify ===
 
     const session = await getOfflineSession(job.shop as string);
-    const generationId = job.id as string;
     const prompt = job.prompt as string;
     const customerId = job.customer_id as string;
 
-    // Update status to processing (saving to Shopify)
-    await executeQuery(
-      db,
-      "UPDATE generations SET status = 'saving', timo_image_url = ?, updated_at = unixepoch() WHERE job_id = ?",
-      [timoStatus.result_url, jobId],
-    );
-
-    // Upload image to Shopify Files
-    const filename = `tattup-${generationId}.png`;
+    // Upload to Shopify Files
+    const filename = `tattup-${jobId}.png`;
     const { fileId, fileUrl } = await uploadImageToShopifyFiles(
       session.shop,
       session.accessToken,
-      timoStatus.result_url,
+      aiStatus.result_url,
       filename,
       `Tattoo: ${prompt}`,
     );
 
-    // Create metaobject entry for gallery
-    let metaobjectId: string | null = null;
+    // Create metaobject for gallery (non-fatal if it fails)
     try {
-      metaobjectId = await createTattooMetaobject(
-        session.shop,
-        session.accessToken,
-        {
-          prompt,
-          shopifyFileId: fileId,
-          customerId,
-          generationId,
-        },
-      );
+      await createTattooMetaobject(session.shop, session.accessToken, {
+        prompt,
+        shopifyFileId: fileId,
+        customerId,
+        jobId,
+      });
     } catch (err) {
-      // Metaobject creation is not critical - log and continue
       console.error("Metaobject creation failed (non-fatal):", err);
     }
 
-    // Update D1 with final data
+    // Update D1 with completion
     await executeQuery(
       db,
-      `UPDATE generations
-       SET status = 'completed',
-           shopify_file_id = ?,
-           shopify_file_url = ?,
-           metaobject_id = ?,
-           updated_at = unixepoch()
-       WHERE job_id = ?`,
-      [fileId, fileUrl, metaobjectId, jobId],
+      "UPDATE generations SET status = 'completed', image_url = ? WHERE job_id = ?",
+      [fileUrl, jobId],
     );
 
     return Response.json({
       status: "completed",
       imageUrl: fileUrl,
-      shopifyFileId: fileId,
-      metaobjectId,
     });
   } catch (error) {
     console.error("Status check error:", error);
