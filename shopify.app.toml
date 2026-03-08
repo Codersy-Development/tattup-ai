@@ -2,7 +2,7 @@
 
 client_id = "985cb594ba588725d9af8366c25587ae"
 name = "tattup-ai"
-application_url = "https://example.com"
+application_url = "https://tattup-ai.azdjelar.workers.dev"
 embedded = true
 
 [webhooks]

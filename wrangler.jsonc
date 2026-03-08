@@ -4,7 +4,8 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "shopify-app-starter-workers-d1",
+  "name": "tattup-ai",
+  "account_id": "c6568f6efacb0164dd2e156b0b280bad",
   "compatibility_date": "2025-04-04",
   "main": "./workers/app.ts",
   "vars": {
@@ -25,7 +26,7 @@
     {
       "binding": "DB",
       "database_name": "shopify-app-db",
-      "database_id": "YOUR_DATABASE_ID_HERE",
+      "database_id": "fd51f66b-dc77-4a8a-b2bb-0e20af6cec6b",
       "migrations_dir": "./migrations",
     },
   ],
