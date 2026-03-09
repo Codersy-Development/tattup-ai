@@ -5,6 +5,8 @@
 {% endcomment %}
 
 {% assign credit_product = all_products[block.settings.credit_product_handle] %}
+{% assign tattoo_product = all_products[block.settings.tattoo_product_handle] %}
+{% assign tattoo_variant_id = tattoo_product.variants.first.id %}
 
 <div
   id="tattup-app"
@@ -12,6 +14,7 @@
   data-logged-in="{% if customer %}true{% else %}false{% endif %}"
   data-customer-id="{% if customer %}{{ customer.id }}{% endif %}"
   data-proxy-base="/apps/tattup"
+  data-tattoo-variant-id="{% if tattoo_variant_id %}{{ tattoo_variant_id }}{% endif %}"
 >
   {%- comment -%} ========== NOT LOGGED IN ========== {%- endcomment -%}
   {% unless customer %}
@@ -207,6 +210,13 @@
       "label": "Credit Product Handle",
       "default": "credit-packages",
       "info": "The handle of the Shopify product used for credit purchases."
+    },
+    {
+      "type": "text",
+      "id": "tattoo_product_handle",
+      "label": "Tattoo Design Product Handle",
+      "default": "tattup-ai-tattoo-design",
+      "info": "The handle of the free product customers add to cart when booking a tattoo design."
     }
   ]
 }

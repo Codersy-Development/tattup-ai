@@ -289,6 +289,30 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin-bottom: 0.5rem;
+}
+
+.tattup-gallery-book-btn {
+  width: 100%;
+  background: var(--tattup-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--tattup-radius-sm);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.tattup-gallery-book-btn:hover {
+  background: var(--tattup-primary-hover);
+}
+
+.tattup-gallery-book-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ─── Modal ─── */

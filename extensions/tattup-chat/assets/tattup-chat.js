@@ -9,6 +9,7 @@
       this.container = container;
       this.proxyBase = container.dataset.proxyBase || "/apps/tattup";
       this.loggedIn = container.dataset.loggedIn === "true";
+      this.tattooVariantId = container.dataset.tattooVariantId || null;
       this.credits = 0;
       this.generating = false;
       this.gallery = [];
@@ -78,6 +79,18 @@
           this.addToCart(variantId, sellingPlanId, btn);
         });
       });
+
+      // Gallery "Book" button (event delegation)
+      const gridEl = this.el("tattup-gallery-grid");
+      if (gridEl) {
+        gridEl.addEventListener("click", (e) => {
+          const btn = e.target.closest(".tattup-gallery-book-btn");
+          if (!btn) return;
+          const imageUrl = btn.dataset.imageUrl;
+          const prompt = btn.dataset.prompt;
+          this.bookTattooDesign(imageUrl, prompt, btn);
+        });
+      }
     }
 
     // ─── API Calls ───
@@ -255,6 +268,12 @@
           <img src="${this.escapeHtml(item.imageUrl)}" alt="Generated tattoo" loading="lazy" />
           <div class="tattup-gallery-item-info">
             <div class="tattup-gallery-item-prompt">${this.escapeHtml(item.prompt || "")}</div>
+            ${this.tattooVariantId ? `
+            <button
+              class="tattup-gallery-book-btn"
+              data-image-url="${this.escapeHtml(item.imageUrl)}"
+              data-prompt="${this.escapeHtml(item.prompt || "")}"
+            >Book This Design</button>` : ""}
           </div>
         </div>
       `
@@ -274,6 +293,40 @@
       if (modal) modal.style.display = "none";
       const status = this.el("tattup-cart-status");
       if (status) status.style.display = "none";
+    }
+
+    async bookTattooDesign(imageUrl, prompt, btn) {
+      if (!this.tattooVariantId) return;
+
+      const origText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "Adding...";
+
+      try {
+        const response = await fetch("/cart/add.js", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: parseInt(this.tattooVariantId, 10),
+            quantity: 1,
+            properties: {
+              "Design Image": imageUrl,
+              Prompt: prompt,
+            },
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to add to cart");
+
+        btn.textContent = "Redirecting...";
+        setTimeout(() => {
+          window.location.href = "/cart";
+        }, 800);
+      } catch (err) {
+        console.error("Book design failed:", err);
+        btn.disabled = false;
+        btn.textContent = origText;
+      }
     }
 
     async addToCart(variantId, sellingPlanId, clickedBtn) {
