@@ -25,7 +25,7 @@
         </div>
         <h2>{{ block.settings.login_heading | default: 'Sign in to Create Tattoos' }}</h2>
         <p>{{ block.settings.login_text | default: 'Create an account or sign in to start generating AI tattoo designs.' }}</p>
-        <a href="{{ routes.account_login_url }}?return_url={{ request.path }}" class="tattup-btn tattup-btn-primary">
+        <a href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}" class="tattup-btn tattup-btn-primary">
           Sign In
         </a>
       </div>
@@ -149,7 +149,7 @@
                     class="tattup-package-btn"
                     data-variant-id="{{ variant.id }}"
                     data-price="{{ variant.price | money }}"
-                    {% if variant.requires_selling_plan %}
+                    {% if variant.selling_plan_allocations.size > 0 %}
                       data-selling-plan-id="{{ variant.selling_plan_allocations.first.selling_plan.id }}"
                     {% endif %}
                   >

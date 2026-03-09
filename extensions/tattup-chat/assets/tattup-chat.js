@@ -75,7 +75,7 @@
         btn.addEventListener("click", () => {
           const variantId = btn.dataset.variantId;
           const sellingPlanId = btn.dataset.sellingPlanId;
-          this.addToCart(variantId, sellingPlanId);
+          this.addToCart(variantId, sellingPlanId, btn);
         });
       });
     }
@@ -276,8 +276,22 @@
       if (status) status.style.display = "none";
     }
 
-    async addToCart(variantId, sellingPlanId) {
+    async addToCart(variantId, sellingPlanId, clickedBtn) {
       const statusEl = this.el("tattup-cart-status");
+
+      // Disable all package buttons and show loading on clicked one
+      const allBtns = document.querySelectorAll(".tattup-package-btn");
+      allBtns.forEach((btn) => {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        btn.style.pointerEvents = "none";
+      });
+      if (clickedBtn) {
+        clickedBtn.classList.add("tattup-loading");
+        const nameEl = clickedBtn.querySelector(".tattup-package-name");
+        if (nameEl) nameEl.dataset.origText = nameEl.textContent;
+        if (nameEl) nameEl.textContent = "Adding to cart...";
+      }
 
       try {
         const body = { id: parseInt(variantId, 10), quantity: 1 };
@@ -293,18 +307,36 @@
 
         if (!response.ok) throw new Error("Failed to add to cart");
 
+        if (clickedBtn) {
+          const nameEl = clickedBtn.querySelector(".tattup-package-name");
+          if (nameEl) nameEl.textContent = "Redirecting to cart...";
+        }
+
         if (statusEl) {
           statusEl.className = "tattup-cart-status success";
-          statusEl.textContent = "Added to cart! Proceed to checkout.";
+          statusEl.textContent = "Added to cart! Redirecting...";
           statusEl.style.display = "";
         }
 
         // Redirect to cart after a short delay
         setTimeout(() => {
           window.location.href = "/cart";
-        }, 1500);
+        }, 1000);
       } catch (err) {
         console.error("Add to cart failed:", err);
+        // Re-enable buttons
+        allBtns.forEach((btn) => {
+          btn.disabled = false;
+          btn.style.opacity = "";
+          btn.style.pointerEvents = "";
+        });
+        if (clickedBtn) {
+          clickedBtn.classList.remove("tattup-loading");
+          const nameEl = clickedBtn.querySelector(".tattup-package-name");
+          if (nameEl && nameEl.dataset.origText) {
+            nameEl.textContent = nameEl.dataset.origText;
+          }
+        }
         if (statusEl) {
           statusEl.className = "tattup-cart-status error";
           statusEl.textContent = "Failed to add to cart. Please try again.";

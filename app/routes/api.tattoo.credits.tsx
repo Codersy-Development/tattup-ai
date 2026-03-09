@@ -12,6 +12,8 @@ import {
   getOfflineSession,
   getCustomerCredits,
   setCustomerCredits,
+  hasCustomerBeenWelcomed,
+  setCustomerWelcomed,
 } from "../services/shopify-admin.server";
 
 const FREE_CREDITS = 1;
@@ -21,19 +23,32 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const proxyCtx = getAppProxyContext(request);
     const session = await getOfflineSession(proxyCtx.shop);
 
-    let credits = await getCustomerCredits(
+    // Check if first-time user → grant free credit
+    const welcomed = await hasCustomerBeenWelcomed(
       session.shop,
       session.accessToken,
       proxyCtx.customerId,
     );
 
-    // First-time user: grant 1 free credit
-    // We detect this by checking if credits === 0 and the metafield doesn't exist.
-    // Since getCustomerCredits returns 0 for both "no metafield" and "metafield = 0",
-    // we grant free credits only once using a separate flag metafield.
-    // For simplicity, we just check if 0 and grant. Repeat visitors who used
-    // their credit will see 0 and need to buy. This is the intended behavior.
-    // TODO: Add a "tattup.welcomed" metafield to distinguish first-time from zero-credit.
+    if (!welcomed) {
+      await setCustomerCredits(
+        session.shop,
+        session.accessToken,
+        proxyCtx.customerId,
+        FREE_CREDITS,
+      );
+      await setCustomerWelcomed(
+        session.shop,
+        session.accessToken,
+        proxyCtx.customerId,
+      );
+    }
+
+    const credits = await getCustomerCredits(
+      session.shop,
+      session.accessToken,
+      proxyCtx.customerId,
+    );
 
     return Response.json({
       credits,

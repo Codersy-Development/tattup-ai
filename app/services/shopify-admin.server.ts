@@ -134,6 +134,53 @@ export async function setCustomerCredits(
 }
 
 /**
+ * Check if a customer has been welcomed (received free credit).
+ */
+export async function hasCustomerBeenWelcomed(
+  shop: string,
+  accessToken: string,
+  customerId: string,
+): Promise<boolean> {
+  const data = await shopifyGraphQL(shop, accessToken, `
+    query getWelcomed($customerId: ID!) {
+      customer(id: $customerId) {
+        metafield(namespace: "${CREDITS_NAMESPACE}", key: "welcomed") {
+          value
+        }
+      }
+    }
+  `, { customerId });
+
+  return data?.customer?.metafield?.value === "true";
+}
+
+/**
+ * Mark a customer as welcomed (received free credit).
+ */
+export async function setCustomerWelcomed(
+  shop: string,
+  accessToken: string,
+  customerId: string,
+): Promise<void> {
+  await shopifyGraphQL(shop, accessToken, `
+    mutation setWelcomed($metafields: [MetafieldsSetInput!]!) {
+      metafieldsSet(metafields: $metafields) {
+        metafields { id }
+        userErrors { field message }
+      }
+    }
+  `, {
+    metafields: [{
+      ownerId: customerId,
+      namespace: CREDITS_NAMESPACE,
+      key: "welcomed",
+      type: "boolean",
+      value: "true",
+    }],
+  });
+}
+
+/**
  * Add credits to a customer (atomic: read current + add).
  */
 export async function addCustomerCredits(
