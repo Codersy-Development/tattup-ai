@@ -15,6 +15,7 @@
   data-customer-id="{% if customer %}{{ customer.id }}{% endif %}"
   data-proxy-base="/apps/tattup"
   data-tattoo-variant-id="{% if tattoo_variant_id %}{{ tattoo_variant_id }}{% endif %}"
+  data-credits="{% if customer %}{{ customer.metafields.tattup.credits.value | default: 0 }}{% else %}0{% endif %}"
 >
   {%- comment -%} ========== NOT LOGGED IN ========== {%- endcomment -%}
   {% unless customer %}

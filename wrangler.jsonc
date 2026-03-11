@@ -10,6 +10,9 @@
   "main": "./workers/app.ts",
   "vars": {
     "VALUE_FROM_CLOUDFLARE": "Hello from Cloudflare",
+    "SHOPIFY_API_KEY": "985cb594ba588725d9af8366c25587ae",
+    "SHOPIFY_APP_URL": "https://tattup-ai.azdjelar.workers.dev",
+    "SCOPES": "write_products,read_customers,write_customers,read_files,write_files,read_metaobject_definitions,write_metaobject_definitions,read_metaobjects,write_metaobjects,read_orders"
   },
   "observability": {
     "enabled": true,

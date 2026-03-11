@@ -10,7 +10,7 @@
       this.proxyBase = container.dataset.proxyBase || "/apps/tattup";
       this.loggedIn = container.dataset.loggedIn === "true";
       this.tattooVariantId = container.dataset.tattooVariantId || null;
-      this.credits = 0;
+      this.credits = parseInt(container.dataset.credits || "0", 10);
       this.generating = false;
       this.gallery = [];
 
@@ -29,7 +29,7 @@
 
     async init() {
       this.bindEvents();
-      await this.fetchCredits();
+      this.updateCreditsDisplay();
       await this.fetchGallery();
     }
 
@@ -105,16 +105,6 @@
     }
 
     // ─── Credits ───
-
-    async fetchCredits() {
-      try {
-        const data = await this.api("/credits");
-        this.credits = data.credits || 0;
-        this.updateCreditsDisplay();
-      } catch (err) {
-        console.error("Failed to fetch credits:", err);
-      }
-    }
 
     updateCreditsDisplay() {
       const el = this.el("tattup-credit-count");
