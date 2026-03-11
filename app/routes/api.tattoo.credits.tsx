@@ -11,7 +11,7 @@ import { getAppProxyContext } from "../services/app-proxy.server";
 import {
   getOfflineSession,
   getCustomerCredits,
-  setCustomerCredits,
+  addCustomerCredits,
   hasCustomerBeenWelcomed,
   setCustomerWelcomed,
 } from "../services/shopify-admin.server";
@@ -23,7 +23,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const proxyCtx = getAppProxyContext(request);
     const session = await getOfflineSession(proxyCtx.shop);
 
-    // Check if first-time user → grant free credit
+    // Check if first-time user → grant free credit (additive, won't overwrite)
     const welcomed = await hasCustomerBeenWelcomed(
       session.shop,
       session.accessToken,
@@ -31,7 +31,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     );
 
     if (!welcomed) {
-      await setCustomerCredits(
+      await addCustomerCredits(
         session.shop,
         session.accessToken,
         proxyCtx.customerId,

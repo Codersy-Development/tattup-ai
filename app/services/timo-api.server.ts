@@ -13,7 +13,7 @@ export interface GenerateResponse {
 
 export interface StatusResponse {
   status: "pending" | "processing" | "completed" | "failed";
-  result_url?: string;
+  imageUrl?: string;
 }
 
 /**

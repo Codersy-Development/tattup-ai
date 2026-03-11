@@ -7,11 +7,10 @@
  *
  * Flow:
  * 1. Validate customer is logged in (from App Proxy)
- * 2. Check credits (standard = 1, pro = 2)
- * 3. Deduct credits
- * 4. Call AI backend to start generation
- * 5. Store job in D1 for status tracking
- * 6. Return jobId for polling
+ * 2. Check credits (standard = 1, pro = 2) — reserve but don't deduct
+ * 3. Call AI backend to start generation
+ * 4. Store job in D1 for status tracking (credits deducted on completion)
+ * 5. Return jobId for polling
  */
 
 import type { ActionFunctionArgs } from "react-router";
@@ -21,7 +20,6 @@ import { getAppProxyContext } from "../services/app-proxy.server";
 import {
   getOfflineSession,
   getCustomerCredits,
-  setCustomerCredits,
 } from "../services/shopify-admin.server";
 
 const CREDIT_COSTS: Record<string, number> = {
@@ -53,7 +51,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     // Calculate credit cost
     const cost = CREDIT_COSTS[model] || 1;
 
-    // Check credits
+    // Check credits (don't deduct yet — only on successful completion)
     const credits = await getCustomerCredits(
       session.shop,
       session.accessToken,
@@ -71,14 +69,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
       );
     }
 
-    // Deduct credits
-    await setCustomerCredits(
-      session.shop,
-      session.accessToken,
-      proxyCtx.customerId,
-      credits - cost,
-    );
-
     // Build the full prompt (include style if provided)
     const fullPrompt = style ? `${prompt} | Style: ${style}` : prompt;
 
@@ -95,14 +85,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const db = getDb();
     await executeQuery(
       db,
-      `INSERT INTO generations (job_id, shop, customer_id, prompt, model, status)
-       VALUES (?, ?, ?, ?, ?, 'pending')`,
-      [jobId, proxyCtx.shop, proxyCtx.customerId, fullPrompt, model],
+      `INSERT INTO generations (job_id, shop, customer_id, prompt, model, status, credit_cost)
+       VALUES (?, ?, ?, ?, ?, 'pending', ?)`,
+      [jobId, proxyCtx.shop, proxyCtx.customerId, fullPrompt, model, cost],
     );
 
     return Response.json({
       jobId,
-      creditsRemaining: credits - cost,
+      creditsRemaining: credits,
     });
   } catch (error) {
     console.error("Generate error:", error);

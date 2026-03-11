@@ -25,6 +25,11 @@ api_version = "2026-04"
   uri = "/webhooks/orders/paid"
 
 
+[app_proxy]
+url = "https://tattup-ai.azdjelar.workers.dev/api/tattoo"
+subpath = "tattup"
+prefix = "apps"
+
 [access_scopes]
 scopes = "write_products,read_customers,write_customers,read_files,write_files,read_metaobject_definitions,write_metaobject_definitions,read_metaobjects,write_metaobjects,read_orders"
 

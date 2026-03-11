@@ -1,0 +1,1 @@
+ALTER TABLE generations ADD COLUMN credit_cost INTEGER NOT NULL DEFAULT 1;

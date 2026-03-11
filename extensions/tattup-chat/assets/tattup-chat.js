@@ -166,8 +166,6 @@
       } catch (err) {
         console.error("Generate failed:", err);
         this.showStatus("Generation failed. Please try again.", true);
-        // Refetch credits in case deduction happened
-        await this.fetchCredits();
       } finally {
         this.setGenerating(false);
       }
@@ -194,6 +192,10 @@
           if (data.status === "completed" && data.imageUrl) {
             this.hideStatus();
             this.addToGallery({ prompt, imageUrl: data.imageUrl });
+            if (data.creditsRemaining !== undefined) {
+              this.credits = data.creditsRemaining;
+              this.updateCreditsDisplay();
+            }
             return;
           }
 
