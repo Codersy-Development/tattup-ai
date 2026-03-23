@@ -2,7 +2,7 @@
  * POST /api/tattoo/generate
  *
  * Starts a tattoo generation job.
- * Body: { prompt: string, model: "standard" | "pro", style?: string }
+ * Body: { prompt, model, style?, aspectRatio?, numImages? }
  * App Proxy adds: ?shop=...&logged_in_customer_id=...
  *
  * Flow:
@@ -34,10 +34,20 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   try {
     const body = await request.json();
-    const { prompt, model = "standard", style } = body as {
+    const {
+      prompt,
+      model = "standard",
+      style,
+      aspectRatio = "1:1",
+      numImages = 1,
+      size = "medium",
+    } = body as {
       prompt?: string;
       model?: string;
       style?: string;
+      aspectRatio?: string;
+      numImages?: number;
+      size?: string;
     };
 
     if (!prompt) {
@@ -79,6 +89,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       env.API_AUTH_TOKEN,
       fullPrompt,
       proxyCtx.shop,
+      { aspectRatio, numImages, model, size },
     );
 
     // Store job context in D1 for status lookups

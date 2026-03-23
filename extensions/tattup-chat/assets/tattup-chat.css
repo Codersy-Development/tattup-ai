@@ -1,26 +1,102 @@
-/* TattUp AI Generator - Theme App Extension Styles */
+/* InkAI Generator - Theme App Extension Styles */
 
 .tattup-container {
-  --tattup-bg: #0d0d1a;
-  --tattup-surface: #161628;
-  --tattup-surface-hover: #1e1e36;
-  --tattup-border: #2a2a44;
-  --tattup-text: #e8e8f0;
-  --tattup-text-muted: #8888aa;
+  --tattup-bg: #0a0a0a;
+  --tattup-surface: #141414;
+  --tattup-surface-hover: #1c1c1c;
+  --tattup-border: #2a2a2a;
+  --tattup-text: #f0f0f0;
+  --tattup-text-muted: #888;
   --tattup-primary: #7c3aed;
   --tattup-primary-hover: #6d28d9;
   --tattup-primary-glow: rgba(124, 58, 237, 0.25);
+  --tattup-accent: #c8ff00;
   --tattup-danger: #ef4444;
   --tattup-success: #22c55e;
   --tattup-radius: 12px;
   --tattup-radius-sm: 8px;
 
-  max-width: 920px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 0 1rem 2rem;
   color: var(--tattup-text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
+}
+
+/* ─── Top Bar ─── */
+
+.tattup-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--tattup-border);
+}
+
+.tattup-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--tattup-text);
+  letter-spacing: 0.02em;
+}
+
+.tattup-logo-icon {
+  width: 28px;
+  height: 28px;
+  background: var(--tattup-primary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tattup-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tattup-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--tattup-text-muted);
+  font-family: inherit;
+}
+
+.tattup-nav-btn:hover {
+  color: var(--tattup-text);
+  background: var(--tattup-surface);
+}
+
+.tattup-nav-btn.active {
+  background: var(--tattup-surface);
+  color: var(--tattup-text);
+  border: 1px solid var(--tattup-border);
+}
+
+.tattup-nav-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.tattup-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 /* ─── Login Screen ─── */
@@ -93,17 +169,27 @@
   box-shadow: none;
 }
 
+/* ─── Tab Panels ─── */
+
+.tattup-tab-panel {
+  display: none;
+}
+
+.tattup-tab-panel.active {
+  display: block;
+}
+
 /* ─── Header ─── */
 
 .tattup-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .tattup-title {
   font-size: 2rem;
   font-weight: 800;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.4rem;
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: var(--tattup-text);
@@ -111,7 +197,7 @@
 
 .tattup-subtitle {
   color: var(--tattup-text-muted);
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
   font-size: 0.95rem;
 }
 
@@ -148,6 +234,11 @@
   margin-bottom: 1.5rem;
 }
 
+.tattup-prompt-wrap {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
 .tattup-textarea {
   width: 100%;
   background: transparent;
@@ -158,7 +249,7 @@
   resize: none;
   outline: none;
   padding: 0.5rem;
-  margin-bottom: 1rem;
+  padding-bottom: 1.5rem;
   line-height: 1.5;
 }
 
@@ -166,9 +257,28 @@
   color: var(--tattup-text-muted);
 }
 
+.tattup-char-count {
+  position: absolute;
+  bottom: 0.25rem;
+  right: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--tattup-text-muted);
+  pointer-events: none;
+}
+
+.tattup-char-count.near-limit {
+  color: #f59e0b;
+}
+
+.tattup-char-count.at-limit {
+  color: var(--tattup-danger);
+}
+
+/* ─── Controls ─── */
+
 .tattup-controls {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 0.75rem;
   flex-wrap: wrap;
 }
@@ -176,19 +286,19 @@
 .tattup-selects {
   display: flex;
   gap: 0.5rem;
-  flex: 1;
+  flex: 1 1 100%;
   min-width: 0;
 }
 
 .tattup-select {
   flex: 1;
-  min-width: 120px;
+  min-width: 100px;
   background: var(--tattup-bg);
   border: 1px solid var(--tattup-border);
   border-radius: var(--tattup-radius-sm);
   color: var(--tattup-text);
   padding: 0.5rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-family: inherit;
   cursor: pointer;
   appearance: auto;
@@ -199,13 +309,260 @@
   border-color: var(--tattup-primary);
 }
 
+.tattup-controls-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.75rem;
+}
+
 .tattup-btn-generate {
   white-space: nowrap;
   padding: 0.6rem 1.5rem;
+  margin-left: auto;
 }
 
 .tattup-btn-icon {
   flex-shrink: 0;
+}
+
+.tattup-cost-label {
+  font-size: 0.8rem;
+  color: var(--tattup-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tattup-cost-label .cost-value {
+  color: var(--tattup-primary);
+  font-weight: 600;
+}
+
+/* ─── Gallery (Generated Images) ─── */
+
+.tattup-gallery {
+  margin-top: 1rem;
+}
+
+.tattup-gallery-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--tattup-text-muted);
+  font-size: 0.9rem;
+}
+
+.tattup-gallery-empty svg {
+  margin-bottom: 0.75rem;
+}
+
+.tattup-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.tattup-gallery-item {
+  background: var(--tattup-surface);
+  border: 1px solid var(--tattup-border);
+  border-radius: var(--tattup-radius);
+  overflow: hidden;
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.tattup-gallery-item:hover {
+  border-color: var(--tattup-primary);
+}
+
+.tattup-gallery-item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+/* Loading placeholder in gallery */
+.tattup-gallery-item.is-loading {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tattup-gallery-item.is-loading .tattup-loading-text {
+  font-size: 0.8rem;
+  color: var(--tattup-text-muted);
+}
+
+/* ─── Image Overlay (hover actions) ─── */
+
+.tattup-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tattup-gallery-item:hover .tattup-img-overlay {
+  opacity: 1;
+}
+
+.tattup-overlay-btn {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--tattup-radius-sm);
+  color: #fff;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tattup-overlay-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.tattup-overlay-btn.primary {
+  background: var(--tattup-primary);
+  border-color: var(--tattup-primary);
+}
+
+.tattup-overlay-btn.primary:hover {
+  background: var(--tattup-primary-hover);
+}
+
+/* ─── Prompt Reveal ─── */
+
+.tattup-gallery-item-info {
+  padding: 0;
+}
+
+.tattup-prompt-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--tattup-border);
+  color: var(--tattup-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.tattup-prompt-toggle:hover {
+  color: var(--tattup-text);
+}
+
+.tattup-prompt-toggle svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s;
+}
+
+.tattup-prompt-toggle.open svg {
+  transform: rotate(180deg);
+}
+
+.tattup-prompt-detail {
+  display: none;
+  padding: 0 0.75rem 0.6rem;
+  font-size: 0.78rem;
+  color: var(--tattup-text-muted);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.tattup-prompt-detail.open {
+  display: block;
+}
+
+.tattup-prompt-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  background: none;
+  border: none;
+  color: var(--tattup-primary);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+
+.tattup-prompt-copy:hover {
+  text-decoration: underline;
+}
+
+/* ─── Explore Tab ─── */
+
+.tattup-explore-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.tattup-explore-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+  color: var(--tattup-text);
+}
+
+.tattup-explore-header p {
+  color: var(--tattup-text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.tattup-explore-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.tattup-explore-item {
+  border-radius: var(--tattup-radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tattup-explore-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.tattup-explore-item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+.tattup-explore-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--tattup-text-muted);
 }
 
 /* ─── Status Indicator ─── */
@@ -233,86 +590,44 @@
   animation: tattup-spin 0.8s linear infinite;
 }
 
+.tattup-spinner-sm {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--tattup-border);
+  border-top-color: var(--tattup-primary);
+  border-radius: 50%;
+  animation: tattup-spin 0.8s linear infinite;
+}
+
 @keyframes tattup-spin {
   to { transform: rotate(360deg); }
 }
 
-/* ─── Gallery ─── */
+/* ─── Error Toast ─── */
 
-.tattup-gallery {
-  margin-top: 1rem;
-}
-
-.tattup-gallery-empty {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--tattup-text-muted);
-  font-size: 0.9rem;
-}
-
-.tattup-gallery-empty svg {
-  margin-bottom: 0.75rem;
-}
-
-.tattup-gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.tattup-gallery-item {
+.tattup-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
   background: var(--tattup-surface);
-  border: 1px solid var(--tattup-border);
-  border-radius: var(--tattup-radius);
-  overflow: hidden;
-  transition: border-color 0.2s;
-}
-
-.tattup-gallery-item:hover {
-  border-color: var(--tattup-primary);
-}
-
-.tattup-gallery-item img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  display: block;
-}
-
-.tattup-gallery-item-info {
-  padding: 0.75rem;
-}
-
-.tattup-gallery-item-prompt {
-  font-size: 0.8rem;
-  color: var(--tattup-text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-bottom: 0.5rem;
-}
-
-.tattup-gallery-book-btn {
-  width: 100%;
-  background: var(--tattup-primary);
-  color: #fff;
-  border: none;
+  border: 1px solid var(--tattup-danger);
   border-radius: var(--tattup-radius-sm);
-  padding: 0.5rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.2s;
+  padding: 0.75rem 1.25rem;
+  color: var(--tattup-text);
+  font-size: 0.85rem;
+  z-index: 10000;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  max-width: 400px;
+  text-align: center;
 }
 
-.tattup-gallery-book-btn:hover {
-  background: var(--tattup-primary-hover);
-}
-
-.tattup-gallery-book-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.tattup-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* ─── Modal ─── */
@@ -445,7 +760,7 @@
 
 @media (max-width: 640px) {
   .tattup-container {
-    padding: 1rem 0.75rem;
+    padding: 0 0.75rem 1rem;
   }
 
   .tattup-title {
@@ -458,6 +773,12 @@
 
   .tattup-selects {
     width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .tattup-select {
+    min-width: 0;
+    flex: 1 1 45%;
   }
 
   .tattup-btn-generate {
@@ -466,5 +787,25 @@
 
   .tattup-gallery-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .tattup-topbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tattup-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tattup-controls-bottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tattup-btn-generate {
+    margin-left: 0;
   }
 }

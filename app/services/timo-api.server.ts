@@ -7,6 +7,13 @@
  *   GET  <imageUrl>         → binary image
  */
 
+export interface GenerateOptions {
+  aspectRatio?: string;
+  numImages?: number;
+  model?: string;
+  size?: string;
+}
+
 export interface GenerateResponse {
   jobId: string;
 }
@@ -25,6 +32,7 @@ export async function startGeneration(
   authToken: string,
   prompt: string,
   shopDomain: string,
+  options: GenerateOptions = {},
 ): Promise<GenerateResponse> {
   const response = await fetch(`${baseUrl}/api/generate`, {
     method: "POST",
@@ -32,7 +40,14 @@ export async function startGeneration(
       "Content-Type": "application/json",
       Authorization: `Bearer ${authToken}`,
     },
-    body: JSON.stringify({ prompt, shopDomain }),
+    body: JSON.stringify({
+      prompt,
+      shopDomain,
+      aspectRatio: options.aspectRatio || "1:1",
+      numImages: options.numImages || 1,
+      model: options.model || "standard",
+      size: options.size || "medium",
+    }),
   });
 
   if (!response.ok) {

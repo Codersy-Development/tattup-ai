@@ -1,7 +1,7 @@
 {% comment %}
-  TattUp AI Generator Block
-  Add this block to any page via the Theme Customizer.
-  Requires: App Proxy configured at /apps/tattup → your Cloudflare Worker
+  InkAI Generator Block
+  Redesigned with Generator + Explore tabs, multiple generation support,
+  and Higgsfield-inspired UI.
 {% endcomment %}
 
 {% assign credit_product = all_products[block.settings.credit_product_handle] %}
@@ -36,34 +36,69 @@
     </div>
   {% endunless %}
 
-  {%- comment -%} ========== LOGGED IN - GENERATOR ========== {%- endcomment -%}
+  {%- comment -%} ========== LOGGED IN ========== {%- endcomment -%}
   {% if customer %}
-    <div class="tattup-main" id="tattup-main">
-      {%- comment -%} Header {%- endcomment -%}
-      <div class="tattup-header">
-        <h1 class="tattup-title">{{ block.settings.heading | default: 'Create Your Next Ink' }}</h1>
-        <p class="tattup-subtitle">{{ block.settings.subheading | default: 'Select a style, describe your vision, and let our AI models draft your masterpiece.' }}</p>
+    {%- comment -%} Top Navigation Bar {%- endcomment -%}
+    <div class="tattup-topbar">
+      <div class="tattup-logo">
+        <div class="tattup-logo-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+        </div>
+        InkAI
+      </div>
+
+      <div class="tattup-nav">
+        <button class="tattup-nav-btn active" data-tab="generator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+          </svg>
+          Generator
+        </button>
+        <button class="tattup-nav-btn" data-tab="explore">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+          </svg>
+          Explore
+        </button>
+      </div>
+
+      <div class="tattup-topbar-right">
         <div class="tattup-credits-badge" id="tattup-credits-badge">
           <span class="tattup-credits-icon">&#9733;</span>
           <span id="tattup-credit-count">...</span> Credits
         </div>
       </div>
+    </div>
+
+    {%- comment -%} ========== GENERATOR TAB ========== {%- endcomment -%}
+    <div class="tattup-tab-panel active" id="tattup-panel-generator">
+      <div class="tattup-header">
+        <h1 class="tattup-title">{{ block.settings.heading | default: 'Create Your Next Ink' }}</h1>
+        <p class="tattup-subtitle">{{ block.settings.subheading | default: 'Select a style, describe your vision, and let our AI models draft your masterpiece.' }}</p>
+      </div>
 
       {%- comment -%} Input Area {%- endcomment -%}
       <div class="tattup-input-card">
-        <textarea
-          id="tattup-prompt"
-          class="tattup-textarea"
-          placeholder="Describe your tattoo idea..."
-          rows="3"
-          maxlength="500"
-        ></textarea>
+        <div class="tattup-prompt-wrap">
+          <textarea
+            id="tattup-prompt"
+            class="tattup-textarea"
+            placeholder="Describe your tattoo idea..."
+            rows="3"
+            maxlength="500"
+          ></textarea>
+          <span class="tattup-char-count" id="tattup-char-count">0 / 500</span>
+        </div>
 
         <div class="tattup-controls">
           <div class="tattup-selects">
             <select id="tattup-model" class="tattup-select">
-              <option value="standard">Standard (1 Credit)</option>
-              <option value="pro">Pro HD (2 Credits)</option>
+              <option value="standard">Nano Banana (Fast) &mdash; 1 Credit</option>
+              <option value="pro">Nano Banana Pro &mdash; 2 Credits</option>
             </select>
             <select id="tattup-style" class="tattup-select">
               <option value="">No specific style</option>
@@ -80,23 +115,43 @@
               <option value="realism">Realism</option>
             </select>
           </div>
+          <div class="tattup-selects">
+            <select id="tattup-aspect-ratio" class="tattup-select">
+              <option value="1:1">1:1 Square</option>
+              <option value="4:3">4:3 Landscape</option>
+              <option value="3:4">3:4 Portrait</option>
+              <option value="16:9">16:9 Wide</option>
+              <option value="9:16">9:16 Tall</option>
+              <option value="2:3">2:3</option>
+              <option value="3:2">3:2</option>
+            </select>
+            <select id="tattup-size" class="tattup-select">
+              <option value="medium">Medium</option>
+              <option value="small">Small</option>
+              <option value="large">Large</option>
+            </select>
+            <select id="tattup-num-images" class="tattup-select">
+              <option value="1">1 Image</option>
+              <option value="2">2 Images</option>
+              <option value="4">4 Images</option>
+            </select>
+          </div>
 
-          <button id="tattup-generate-btn" class="tattup-btn tattup-btn-primary tattup-btn-generate">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tattup-btn-icon">
-              <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
-            </svg>
-            <span id="tattup-generate-text">Generate</span>
-          </button>
+          <div class="tattup-controls-bottom">
+            <span class="tattup-cost-label">
+              Cost: <span class="cost-value" id="tattup-cost-display">1</span> credit(s)
+            </span>
+            <button id="tattup-generate-btn" class="tattup-btn tattup-btn-primary tattup-btn-generate">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tattup-btn-icon">
+                <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+              </svg>
+              <span id="tattup-generate-text">Generate</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {%- comment -%} Status indicator {%- endcomment -%}
-      <div id="tattup-status" class="tattup-status" style="display:none;">
-        <div class="tattup-spinner"></div>
-        <span id="tattup-status-text">Generating your tattoo...</span>
-      </div>
-
-      {%- comment -%} Gallery {%- endcomment -%}
+      {%- comment -%} Gallery — generated images appear here (including loading placeholders) {%- endcomment -%}
       <div class="tattup-gallery" id="tattup-gallery">
         <div class="tattup-gallery-empty" id="tattup-gallery-empty">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4">
@@ -109,6 +164,21 @@
         <div class="tattup-gallery-grid" id="tattup-gallery-grid"></div>
       </div>
     </div>
+
+    {%- comment -%} ========== EXPLORE TAB ========== {%- endcomment -%}
+    <div class="tattup-tab-panel" id="tattup-panel-explore">
+      <div class="tattup-explore-header">
+        <h2>Explore Designs</h2>
+        <p>Browse tattoo designs from the community for inspiration.</p>
+      </div>
+      <div class="tattup-explore-grid" id="tattup-explore-grid"></div>
+      <div class="tattup-explore-empty" id="tattup-explore-empty">
+        <p>Community designs coming soon.</p>
+      </div>
+    </div>
+
+    {%- comment -%} ========== ERROR TOAST ========== {%- endcomment -%}
+    <div class="tattup-toast" id="tattup-toast"></div>
 
     {%- comment -%} ========== BUY CREDITS MODAL ========== {%- endcomment -%}
     <div id="tattup-buy-modal" class="tattup-modal-overlay" style="display:none;">
@@ -176,7 +246,7 @@
 
 {% schema %}
 {
-  "name": "TattUp AI Generator",
+  "name": "InkAI Generator",
   "target": "section",
   "javascript": "tattup-chat.js",
   "stylesheet": "tattup-chat.css",

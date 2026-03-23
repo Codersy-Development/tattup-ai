@@ -2,7 +2,7 @@
  * GET /api/tattoo/credits
  *
  * Returns the current customer's credit balance.
- * Also grants 1 free credit on first visit (if credits metafield doesn't exist).
+ * Also grants 2 free credits on first visit (if credits metafield doesn't exist).
  * App Proxy adds: ?shop=...&logged_in_customer_id=...
  */
 
@@ -16,7 +16,7 @@ import {
   setCustomerWelcomed,
 } from "../services/shopify-admin.server";
 
-const FREE_CREDITS = 1;
+const FREE_CREDITS = 2;
 
 export async function loader({ request }: LoaderFunctionArgs) {
   try {
