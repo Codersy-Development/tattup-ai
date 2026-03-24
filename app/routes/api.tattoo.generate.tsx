@@ -39,15 +39,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
       model = "standard",
       style,
       aspectRatio = "1:1",
-      numImages = 1,
-      size = "medium",
     } = body as {
       prompt?: string;
       model?: string;
       style?: string;
       aspectRatio?: string;
-      numImages?: number;
-      size?: string;
     };
 
     if (!prompt) {
@@ -89,7 +85,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       env.API_AUTH_TOKEN,
       fullPrompt,
       proxyCtx.shop,
-      { aspectRatio, numImages, model, size },
+      { aspectRatio, model },
     );
 
     // Store job context in D1 for status lookups

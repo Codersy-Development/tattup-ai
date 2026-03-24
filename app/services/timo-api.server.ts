@@ -9,9 +9,7 @@
 
 export interface GenerateOptions {
   aspectRatio?: string;
-  numImages?: number;
   model?: string;
-  size?: string;
 }
 
 export interface GenerateResponse {
@@ -44,9 +42,7 @@ export async function startGeneration(
       prompt,
       shopDomain,
       aspectRatio: options.aspectRatio || "1:1",
-      numImages: options.numImages || 1,
       model: options.model || "standard",
-      size: options.size || "medium",
     }),
   });
 

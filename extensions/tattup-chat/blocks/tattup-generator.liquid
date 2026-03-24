@@ -125,16 +125,6 @@
               <option value="2:3">2:3</option>
               <option value="3:2">3:2</option>
             </select>
-            <select id="tattup-size" class="tattup-select">
-              <option value="medium">Medium</option>
-              <option value="small">Small</option>
-              <option value="large">Large</option>
-            </select>
-            <select id="tattup-num-images" class="tattup-select">
-              <option value="1">1 Image</option>
-              <option value="2">2 Images</option>
-              <option value="4">4 Images</option>
-            </select>
           </div>
 
           <div class="tattup-controls-bottom">
@@ -151,7 +141,10 @@
         </div>
       </div>
 
-      {%- comment -%} Gallery — generated images appear here (including loading placeholders) {%- endcomment -%}
+      {%- comment -%} Active generation jobs status bar {%- endcomment -%}
+      <div class="tattup-jobs-bar" id="tattup-jobs-bar"></div>
+
+      {%- comment -%} Gallery — completed images {%- endcomment -%}
       <div class="tattup-gallery" id="tattup-gallery">
         <div class="tattup-gallery-empty" id="tattup-gallery-empty">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4">

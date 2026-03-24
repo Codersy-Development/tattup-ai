@@ -1,7 +1,18 @@
 /* InkAI Generator - Theme App Extension Styles */
 
+/* Parent section forced dark via JS (.tattup-section-dark) */
+.tattup-section-dark {
+  background: #0a0a0a !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Override theme's generic .active background */
+.tattup-container .active {
+  background-color: transparent !important;
+}
+
 .tattup-container {
-  --tattup-bg: #0a0a0a;
   --tattup-surface: #141414;
   --tattup-surface-hover: #1c1c1c;
   --tattup-border: #2a2a2a;
@@ -22,6 +33,7 @@
   color: var(--tattup-text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
+  background: var(--tattup-bg);
 }
 
 /* ─── Top Bar ─── */
@@ -82,8 +94,9 @@
   background: var(--tattup-surface);
 }
 
-.tattup-nav-btn.active {
-  background: var(--tattup-surface);
+.tattup-container .tattup-nav-btn.active {
+  background: var(--tattup-surface) !important;
+  background-color: var(--tattup-surface) !important;
   color: var(--tattup-text);
   border: 1px solid var(--tattup-border);
 }
@@ -171,12 +184,14 @@
 
 /* ─── Tab Panels ─── */
 
-.tattup-tab-panel {
+.tattup-container .tattup-tab-panel {
   display: none;
+  background-color: transparent !important;
 }
 
-.tattup-tab-panel.active {
+.tattup-container .tattup-tab-panel.active {
   display: block;
+  background-color: transparent !important;
 }
 
 /* ─── Header ─── */
@@ -369,6 +384,9 @@
   border-radius: var(--tattup-radius);
   overflow: hidden;
   transition: border-color 0.2s;
+}
+
+.tattup-gallery-img-wrap {
   position: relative;
 }
 
@@ -383,19 +401,34 @@
   display: block;
 }
 
-/* Loading placeholder in gallery */
-.tattup-gallery-item.is-loading {
-  min-height: 220px;
+/* ─── Active Jobs Status Bar ─── */
+
+.tattup-jobs-bar {
   display: flex;
-  align-items: center;
-  justify-content: center;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.tattup-gallery-item.is-loading .tattup-loading-text {
-  font-size: 0.8rem;
+.tattup-job-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--tattup-surface);
+  border: 1px solid var(--tattup-border);
+  border-radius: var(--tattup-radius-sm);
   color: var(--tattup-text-muted);
+  font-size: 0.85rem;
+}
+
+.tattup-job-status .tattup-job-prompt {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--tattup-text);
+  font-size: 0.8rem;
 }
 
 /* ─── Image Overlay (hover actions) ─── */
@@ -405,6 +438,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
@@ -412,7 +446,7 @@
   transition: opacity 0.2s;
 }
 
-.tattup-gallery-item:hover .tattup-img-overlay {
+.tattup-gallery-img-wrap:hover .tattup-img-overlay {
   opacity: 1;
 }
 
@@ -437,12 +471,17 @@
   background: rgba(255, 255, 255, 0.25);
 }
 
-.tattup-overlay-btn.primary {
+.tattup-overlay-btn.test-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.tattup-overlay-btn.book-btn {
   background: var(--tattup-primary);
   border-color: var(--tattup-primary);
 }
 
-.tattup-overlay-btn.primary:hover {
+.tattup-overlay-btn.book-btn:hover {
   background: var(--tattup-primary-hover);
 }
 
@@ -563,6 +602,7 @@
   text-align: center;
   padding: 4rem 1rem;
   color: var(--tattup-text-muted);
+  background: var(--tattup-bg);
 }
 
 /* ─── Status Indicator ─── */
